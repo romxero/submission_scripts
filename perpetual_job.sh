@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J "persistent_nextpyp_job"
 #SBATCH --signal=B:SIGUSR1@90
-#SBATCH --time=4-00:00:00
+#SBATCH --time=1-00:00:00
 #SBATCH -c 2 
 #SBATCH -p cpu
 #SBATCH -N 1
@@ -11,7 +11,7 @@
 #SBATCH --error=persistent_nextpyp_job_%A.%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=randall.white@czbiohub.org
-##SBATCH -D /home/randall.white/hpc/spack 
+#SBATCH -D /home/randall.white/Documents/code/next_pyp_builds/shared
 
 # catch the SIGUSR1 signal
 _resubmit() {
@@ -26,7 +26,6 @@ export -f _resubmit
 #trap the signal
 trap _resubmit SIGUSR1
 
-
 #main logic begins 
 ml purge
 
@@ -40,21 +39,25 @@ MY_HOSTNAME=$(echo ${MY_FQDN_HOSTNAME} | cut -d '.' -f 1)
 MY_SHORT_MESSAGE="NextPYP job starting on host: ${MY_FQDN_HOSTNAME}, on this date: ${MY_DATE}"
 PYP_CONFIG=~/.config.toml
 PYP_CONTAINER_LOCATION="/home/randall.white/Documents/code/next_pyp_builds/pyp.sif"
+PYP_SCRATCH_LOCATION="/tmp/pyp_rcwhite"
 PYP_WEB_LOCAL_DIR="/home/randall.white/Documents/code/next_pyp_builds/local"
 PYP_WEB_SHARED_DIR="/home/randall.white/Documents/code/next_pyp_builds/shared"
 PYP_WEB_WORKFLOWS_DIR="/home/randall.white/Documents/code/next_pyp_builds/workflows"
 PYP_REMOTE_PORT=8080
 PYP_LOCAL_PORT=8080
 
+
+
+
 #configure the toml file here on the fly  
 cat << EOF > ${PYP_CONFIG}
 [pyp]
-container = '/home/randall.white/Documents/code/next_pyp_builds/pyp.sif'
-scratch = '/tmp/pyp_rcwhite'
+container = '${PYP_CONTAINER_LOCATION}'
+scratch = '${PYP_SCRATCH_LOCATION}'
 
 [slurm]
 user = '${USER}'
-host = '${MY_HOSTNAME}
+host = '${MY_HOSTNAME}'
 memoryPerNode = '${SLURM_MEM_PER_NODE}'
 cpusPerNode = '${SLURM_CPUS_ON_NODE}'
 
@@ -63,17 +66,19 @@ localDir = '${PYP_WEB_LOCAL_DIR}'
 sharedDir = '${PYP_WEB_SHARED_DIR}'
 webhost = 'https://${MY_HOSTNAME}'
 workflowDirs = ['${PYP_WEB_WORKFLOWS_DIR}']
+
+
 EOF
 
 #exporting the configuration toml
 
 #send an email and create a log entry that the job is ready 
-echo ${MY_SHORT_MESSAGE} | mailx -s "subject" randall.white@czbiohub.org
-logger -s ${MY_SHORT_MESSAGE}
+echo '${MY_SHORT_MESSAGE}' | mailx -s "subject" randall.white@czbiohub.org
+logger -s '${MY_SHORT_MESSAGE}'
 
-
+#start the program
 export PYP_CONFIG
-/hpc/apps/nextpyp/0.5/start & 
+/hpc/apps/nextpyp/0.5/bin/start & 
 
 
 #Wait until job submits until I can exit out of the menu
