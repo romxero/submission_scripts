@@ -26,3 +26,5 @@ I hope You are having a good dayy"
 MESSAGE_PAYLOAD="{\"text\": \"$MY_MESSAGE\" }"
 
 curl -d "${MESSAGE_PAYLOAD}" -H "${MY_HTTP_HEADER}" -X POST "${MY_URL}"
+
+wait 
