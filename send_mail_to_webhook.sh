@@ -27,4 +27,7 @@ MESSAGE_PAYLOAD="{\"text\": \"$MY_MESSAGE\" }"
 
 curl -d "${MESSAGE_PAYLOAD}" -H "${MY_HTTP_HEADER}" -X POST "${MY_URL}"
 
+while true; do sleep 3; done
+
+
 wait 
