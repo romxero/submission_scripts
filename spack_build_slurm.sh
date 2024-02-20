@@ -19,13 +19,13 @@ ml purge
 
 git clone git@github.com:romxero/spack_cz_tester.git
 
-cp spack_cz_tester/cz_spack.yml
+cp spack_cz_tester/cz_spack.yml .
 
 ml load gcc/11.3.0
 
 source spack/share/spack/setup-env.sh
 
-spack env activate myenv
+spack env activate myenv ./cz_spack.yml
 
 spack install 
 
