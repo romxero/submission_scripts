@@ -1,5 +1,5 @@
 #!/bin/bash
-## 02/15/24
+## 03/07/24
 ## start spid jupyter
 
 #note that the container already pretty much creates the directories, just make sure to bind `/hpc` and pass --nv to use gpus
@@ -8,6 +8,11 @@
 CONTAINER_FULL_PATH='/hpc/apps/spid/master/bin/spid_container.sif'
 
 #noteboook location to launch everything 
+SPID_CACHE_DIR=${HOME}/.spid_cache
+if ! [ -d ${SPID_CACHE_DIR} ]; then
+    mkdir -p ${SPID_CACHE_DIR}
+fi
+
 NOTEBOOK_ROOT=${HOME}
 
 function create_random_port () 
@@ -44,7 +49,9 @@ EOL
 
 echo "Starting SPID Container w/ Jupyter Notebook"
 
-apptainer instance start --nv --bind /hpc:/hpc ${CONTAINER_FULL_PATH} jupyter notebook --config="${CONFIG_FILE}"
+apptainer exec --writable-tmpfs --nv --bind /hpc:/hpc ${CONTAINER_FULL_PATH} jupyter notebook --config="${CONFIG_FILE}"
 
 exit 0 
+
+
 
