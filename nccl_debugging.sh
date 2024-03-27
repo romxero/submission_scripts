@@ -60,6 +60,8 @@ srun -np 4 ./build/all_reduce_perf -b 8 -e 128M -f 2 -g 1
 # srun -n 4 /opt/nccl-tests/build/${TEST} -b 8 -e 8G -f 2 -g 1 -c 0
 
 
+# now test the relaxed ordering
+export NCCL_IB_PCI_RELAXED_ORDERING=1 
 
 
 ```#!/bin/bash
