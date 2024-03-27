@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=relion_build
 #SBATCH --partition=preempted,gpu
-#SBATCH --time=04:00:00
+#SBATCH --time=01:30:00
 #SBATCH --gpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
@@ -110,7 +110,7 @@ exit 0
     make -j 8
 
     make install 
-    
+
     popd 
 
     }
