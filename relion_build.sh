@@ -70,7 +70,7 @@ do
     -DCMAKE_C_FLAGS="-O2 -g -lm" \
     -DCMAKE_CXX_FLAGS="-O2 -g -lm -lstdc++" \
     -DPYTHON_EXE_PATH="/usr/bin/python3.9" \
-    -DCMAKE_INSTALL_PREFIX=${MY_BUILD_BASE}/tester_${C_ARCH} \
+    -DCMAKE_INSTALL_PREFIX="/hpc/apps/relion/ver5.0-git-CU${C_ARCH}" \
     ..
 
     make -j 8
