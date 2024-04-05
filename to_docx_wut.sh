@@ -14,5 +14,5 @@ function convert_to_docx() {
 export -f convert_to_docx
 
 
-find . -name "*.md" -print | xargs -I '{}' bash -c 'convert_to_docx "{}"'
+find . -name "*.md" -print | xargs -P 8 -I '{}' bash -c 'convert_to_docx "{}"'
 
