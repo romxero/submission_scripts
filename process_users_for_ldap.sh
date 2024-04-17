@@ -97,3 +97,9 @@ member: CN=Deepika Sundarraman,OU=Employee,OU=BiohubUsers,OU=CZ Biohub SF,DC=czb
 EOF
 
 ldapmodify -h domcon02.czbiohub.org  -D "admin.rwhite@czbiohub.org" -Y GSSAPI -f somefile.ldif
+
+
+One jbod is missing 12 disks. John needs to investigate exactly whats going on.
+We'll try it and if it doesn't. Work well .
+Starfish guys -> CZii settled down into their role of working
+CZID data movements -> Look more into Amazon stuff -> temporary spot to set storage might be needed.
