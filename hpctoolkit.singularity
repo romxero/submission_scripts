@@ -1,0 +1,64 @@
+BootStrap: docker
+From: almalinux:8.9
+
+# just an hpc toolkit installation
+%labels
+    Maintainer Randall "RC" White
+    Version .02
+
+%post
+# doing an installation of the hpc toolkiti for analysis 
+dnf -y install gcc git wget make m4 python3 python3-pip python3-devel curl gcc-c++ gcc-gfortran
+
+# comment below to stop the installation of the debugging tools
+dnf -y install gdb tree nano vim lldb strace  
+
+# make sure we make /opt writable for others/users/owners
+mkdir -p /opt
+chmod -R oga+rwx /opt
+
+# make sure the `/hpc` directory exists in the container, also make sure that its writable
+mkdir -p /hpc
+chmod -R oga+rwx /hpc
+
+# depot paths  
+export HPC_TOOLKIT_TARGET_DIR=/opt/hpc_toolkit
+mkdir -p ${HPC_TOOLKIT_TARGET_DIR}
+
+# time to grab spack
+pushd ${HPC_TOOLKIT_TARGET_DIR}
+
+
+# we got to install our spack environment here
+git clone -c feature.manyFiles=true https://github.com/spack/spack.git
+
+# we need to grab the hpctoolkit repository 
+git clone https://gitlab.com/hpctoolkit/hpctoolkit.git
+
+# source the spack environment
+source spack/share/spack/setup-env.sh
+# . spack/share/spack/setup-env.sh
+
+# have spack find the compiler and internal packages in the container 
+spack compiler find /
+spack external find /
+
+# maybe use this:
+spack external find --all -j 8
+
+
+
+#### end of post initialization
+
+%environment
+export HPC_TOOLKIT_TARGET_DIR=/opt/hpc_toolkit
+source ${HPC_TOOLKIT_TARGET_DIR}/spack/share/spack/setup-env.sh
+
+# export PATH=/opt/julia/bin:/opt/Spid.jl/bin:$PATH
+
+# try to get the locales right here
+export LC_ALL="C"
+
+%runscript
+
+
