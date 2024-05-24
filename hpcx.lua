@@ -3,7 +3,8 @@
 --
 
 local pkg = {}
-local appsroot = appsRoot()
+local app = {}
+local hpcx = {}
 
 -- get module name/version and build paths
 pkg.name = myModuleName()
@@ -34,8 +35,9 @@ setenv("HPCX_NCCL_RDMA_SHARP_PLUGIN_DIR", pathJoin(app.root, "nccl-rdma-sharp-pl
 setenv("HPCX_CLUSTERKIT_DIR", pathJoin(app.root, "clusterkit"))
 setenv("HPCX_MPI_DIR", pathJoin(app.mpi_path))
 setenv("HPCX_OSHMEM_DIR", pathJoin(app.mpi_path))
-setenv("HPCX_MPI_TESTS_DIR", pathJoin(app.mpi_path, "mpi-tests"))
-setenv("HPCX_OSU_DIR", pathJoin(app.mpi_path, "osu"))
+setenv("HPCX_MPI_TESTS_DIR", pathJoin(app.mpi_path, "tests"))
+setenv("HPCX_OSU_DIR", pathJoin(app.mpi_path, "tests/osu-micro-benchmarks"))
+setenv("HPCX_OSU_CUDA_DIR", pathJoin(app.mpi_path, "tests/osu-micro-benchmarks-cuda"))
 
 -- setting up the PATH, LD_LIBRARY_PATH, and LIBRARY_PATH, CPATH and PKG_CONFIG_PATH
 -- PATH
@@ -71,31 +73,26 @@ prepend_path("CPATH", pathJoin(app.mpi_path, "include"))
 
 -- PKG_CONFIG_PATH
 prepend_path("PKG_CONFIG_PATH", pathJoin(app.root, "hcoll/lib/pkgconfig"))
-prepend_path("PKG_CONFIG_PATH", pathJoin(app.root, "sharp/lib/pkgconfig))
+prepend_path("PKG_CONFIG_PATH", pathJoin(app.root, "sharp/lib/pkgconfig"))
 prepend_path("PKG_CONFIG_PATH", pathJoin(app.root, "ucx/lib/pkgconfig"))
 prepend_path("PKG_CONFIG_PATH", pathJoin(app.root, "ompi/lib/pkgconfig"))
 
 -- MANPATH
-prepend_path("MANPATH", pathJoin(app.root, "share/man"))
+prepend_path("MANPATH", pathJoin(app.mpi_path, "share/man"))
 
 -- Included openmpi stuff 
-setenv("OPAL_PREFIX", app.root)
-setenv("PMIX_INSTALL_PREFIX", app.root)
-setenv("OMPI_HOME", app.root)
-setenv("MPI_HOME", app.root)
-setenv("OSHMEM_HOME", app.root)
-setenv("SHMEM_HOME", app.root)
+setenv("OPAL_PREFIX", app.mpi_path)
+setenv("PMIX_INSTALL_PREFIX", app.mpi_path)
+setenv("OMPI_HOME", app.mpi_path)
+setenv("MPI_HOME", app.mpi_path)
+setenv("OSHMEM_HOME", app.mpi_path)
+setenv("SHMEM_HOME", app.mpi_path)
 
+--
 
-prepend_path("PATH", pathJoin(app.mpi_path, "bin")
-prepend_path("LD_LIBRARY_PATH", pathJoin(app.mpi_path, "lib")
-prepend_path("LIBRARY_PATH", pathJoin(app.mpi_path, "lib")
-
-
-
-
-
-
+prepend_path("PATH", pathJoin(app.mpi_path, "bin"))
+prepend_path("LD_LIBRARY_PATH", pathJoin(app.mpi_path, "lib"))
+prepend_path("LIBRARY_PATH", pathJoin(app.mpi_path, "lib"))
 
 -------------------------------------------------------------------------------------
 -- Our whatis info for this module.
@@ -116,7 +113,3 @@ local help_message = [[
     help(help_message,"\n")
 
 
--- prepend_path("PATH", pathJoin(app.root, "bin"))
--- prepend_path("LD_LIBRARY_PATH", pathJoin(app.root, "lib64"))
--- prepend_path("C_PATH", pathJoin(app.root, "include"))
--- prepend_path("MANPATH", pathJoin(app.root, "share/man"))
