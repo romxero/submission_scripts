@@ -16,21 +16,21 @@ setup_env
 # Set up a temporary directory for RStudio Server in /tmp
 #MY_PRE_TMP=$(mktemp -d -t rstudio_${USER}_server-XXXX)
 
-export TMPDIR=$(mktemp -d -t rstudio_${USER}_server-XXXX)
-mkdir -p $TMPDIR/var/lib/rstudio-server
-mkdir -p $TMPDIR/var/run/rstudio-server
+export MY_TMP_DIR=$(mktemp -d -t rstudio_${USER}_server-XXXX)
+mkdir -p $MY_TMP_DIR/var/lib/rstudio-server
+mkdir -p $MY_TMP_DIR/var/run/rstudio-server
 
-cat /proc/sys/kernel/random/uuid > "$TMPDIR/var/run/rstudio-server/secure-cookie-key"
-chmod 0600 "$TMPDIR/var/run/rstudio-server/secure-cookie-key"
+cat /proc/sys/kernel/random/uuid > "$MY_TMP_DIR/var/run/rstudio-server/secure-cookie-key"
+chmod 0600 "$MY_TMP_DIR/var/run/rstudio-server/secure-cookie-key"
 
-export RSTUDIO_DB_FILE="$TMPDIR/var/lib/rstudio-server/rstudio-os.sqlite"
+export RSTUDIO_DB_FILE="$MY_TMP_DIR/var/lib/rstudio-server/rstudio-os.sqlite"
 touch $RSTUDIO_DB_FILE
 chmod 0600 $RSTUDIO_DB_FILE
 
 echo "Starting up rserver..."
 
-singularity exec --bind $TMPDIR/var/lib/rstudio-server:/var/lib/rstudio-server \
-  --bind $TMPDIR/var/run/rstudio-server:/var/run/rstudio-server \
+singularity exec --bind $MY_TMP_DIR/var/lib/rstudio-server:/var/lib/rstudio-server \
+  --bind $MY_TMP_DIR/var/run/rstudio-server:/var/run/rstudio-server \
   --home /home/oodadmin:/home/oodadmin \
   $RSTUDIO_SERVER_IMAGE \
   /usr/lib/rstudio-server/bin/rserver \
@@ -50,9 +50,9 @@ if ! nc -z localhost ${port}; then
   echo "Timed out waiting for RStudio Server to open port ${port}!"
   
   echo "Capturing log files for debugging:"
-  if [ -f "${TMPDIR}/rsession.log" ]; then
+  if [ -f "${MY_TMP_DIR}/rsession.log" ]; then
     echo "Content of rsession.log:"
-    cat "${TMPDIR}/rsession.log"
+    cat "${MY_TMP_DIR}/rsession.log"
   else
     echo "rsession.log not found."
   fi
