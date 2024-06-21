@@ -8,6 +8,9 @@ ml purge
 # please change this to the respective R version. 
 ml load R/4.3 
 
+
+reset_rstudio_env () {
+
 pushd ~
 # remove stored data file and history
 # remove the Rstudio-Desktop state file
@@ -48,3 +51,10 @@ fi
 Rscript <(echo "gc(); gctorture(FALSE);")
 
 popd 
+
+
+
+}
+
+
+reset_rstudio_env

@@ -1,7 +1,7 @@
 import speech_recognition as sr
 
 # Load the audio file
-audio_file_path = "/Users/randall.white/Downloads/Sherlock_on-boarding.mp3"
+audio_file_path = "/Users/randall.white/Downloads/Sherlock_on-boarding.wav"
 
 # Initialize the recognizer
 recognizer = sr.Recognizer()
