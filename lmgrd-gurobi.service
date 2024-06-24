@@ -1,0 +1,13 @@
+[Unit]
+Description=Gurobi Token Server
+After=network.target
+
+[Service]
+Type=simple
+User=flexlm
+ExecStart=/opt/gurobi/gurobi951/linux64/bin/grb_ts -n
+ExecStop=/opt/gurobi/gurobi951/linux64/bin/grb_ts -d
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
