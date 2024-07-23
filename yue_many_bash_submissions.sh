@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #this will start the sync at 6pm every day
-
 for i in {0..60}
 {
 
@@ -11,6 +10,5 @@ for i in {0..60}
 
     sleep 1
 }
-
 #cancel everything here:
 #squeue -u $USER -o %i,%u,%R | grep Dependency | cut -d ',' -f 1 | xargs -I '{}' scancel '{}'
