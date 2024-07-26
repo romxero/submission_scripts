@@ -1,5 +1,7 @@
 #!/bin/bash
-# This script is used to find all the CUDA files in the motioncorr project
+
+
+# these variables are likely not needed anymore
 MAIN_PROJ_DIR="/home/randall.white/mydata/motioncorr_dev_work"
 MY_CUDA_PATH="/hpc/apps/x86_64/cuda/12.4.0_550.54.14"
 
@@ -67,6 +69,8 @@ function main()
 
 
 }
+
+
 
 
 # main execution 
