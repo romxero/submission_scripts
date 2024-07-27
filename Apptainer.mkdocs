@@ -1,0 +1,27 @@
+Bootstrap: docker
+From: yuzutech/kroki
+
+# This container is for deploying mkdocs for czbiohub bruno hpc documentation. 
+
+%labels
+        Author _RC_
+
+%setup
+
+%files
+
+%post
+
+apt-get -ymq update
+apt-get -ymq install python3-pip
+
+pip3 install mkdocs-material mkdocs-kroki-plugin mkdocs-gitbook lantana mkdocs-bootstrap4 mkdocs-cluster #--break-system-packages
+
+
+
+%environment
+export LC_ALL=C.UTF-8
+
+
+%runscript
+java -jar /usr/local/kroki/kroki-server.jar
