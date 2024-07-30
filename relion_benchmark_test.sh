@@ -41,6 +41,23 @@ function download_openmpi_and_ucx_then_install()
    # exit ucx dir
 
    #openmpi installation
+    pushd openmpi-5.0.5/
+    mkdir -p build
+    pushd build
+    ../configure --prefix=${INSTALL_DEST_DIR} --with-ucx=${INSTALL_DEST_DIR} \
+    --with-rocm=/opt/rocm \
+    --enable-mca-no-build=btl-uct --enable-mpi1-compatibility \
+    CC=gcc CXX=g++ FC=gfortran
+
+    #clean it up
+    make distclean
+    make clean
+
+    popd
+    #exit out of the openmpi build dir
+    
+    popd
+    #exit out of the openmpi dir
 
 }
 
@@ -190,6 +207,10 @@ function enter_directory_and_download_spack_and_install_amd()
     spack install hipify-clang
     spack install apptainer@1.3.3
     spack install rocm-cmake    
+
+    spack load gcc@14.1.0
+    spack compiler find
+    spack compiler rm gcc@12.3.0 
 
 }
 
