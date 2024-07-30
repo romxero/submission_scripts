@@ -3,16 +3,45 @@
 # env variables 
 MY_CURR_DIR=$(pwd)
 MY_WORK_DIR="${MY_CURR_DIR}/relion_benchmark_directory"
-BENCHMARK_PAYLOAD="sftp://ftp.mrc-lmb.cam.ac.uk/pub/scheres/relion_benchmark.tar.gz"
+BENCHMARK_PAYLOAD="ftp://ftp.mrc-lmb.cam.ac.uk/pub/scheres/relion_benchmark.tar.gz"
 MY_HIP_WORK_DIR="./hip_work" 
-OMPI_DOWNLOAD_LINK=https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.5.tar.gz
-MY_CORE_COUNT=256
+OMPI_DOWNLOAD_LINK="https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.5.tar.gz"
+UCX_DOWNLOAD_LINK="https://github.com/openucx/ucx/releases/download/v1.17.0/ucx-1.17.0.tar.gz"
+MY_CORE_COUNT=24 # don't use too much lol
+INSTALL_DEST_DIR=${MY_WORK_DIR}/install_dir 
 
 
-function download_openmpi()
+function download_openmpi_and_ucx_then_install()
 {
     wget ${OMPI_DOWNLOAD_LINK}
     tar -xvf openmpi-5.0.5.tar.gz
+   
+   wget ${UCX_DOWNLOAD_LINK}
+   tar -xvf v1.17.0.tar.gz
+   
+   #ucx installation
+   pushd ucx-1.17.0/
+   mkdir -p build 
+   pushd build 
+
+   bash ../contrib/configure-release --prefix=${INSTALL_DEST_DIR} \
+    --with-rocm=/opt/rocm \
+    --without-cuda -enable-optimizations -disable-logging \
+    --disable-debug -disable-assertions \
+    --disable-params-check -without-java
+
+    make -j ${MY_CORE_COUNT}
+    make install
+    #clean it up
+    make distclean
+    make clean
+   popd
+   # exit build dir
+   popd 
+   # exit ucx dir
+
+   #openmpi installation
+
 }
 
 # these variables are likely not needed anymore
@@ -22,7 +51,11 @@ function download_openmpi()
 
 function grab_build_packages()
 {
-    sudo apt-get install cmake
+    sudo apt update
+    sudo add-apt-repository -y ppa:apptainer/ppa
+    sudo apt update
+    sudo apt-get install cmake fuse3 libfuse3-dev
+    sudo apt install -y apptainer-suid
 }
 
 function set_ulimit()
@@ -155,7 +188,7 @@ function enter_directory_and_download_spack_and_install_amd()
     # time to install some packages 
     spack install -j ${MY_CORE_COUNT} gcc@14.1.0
     spack install hipify-clang
-    
+    spack install apptainer@1.3.3
     spack install rocm-cmake    
 
 }
