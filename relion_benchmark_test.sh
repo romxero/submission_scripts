@@ -11,6 +11,34 @@ MY_CORE_COUNT=24 # don't use too much lol
 INSTALL_DEST_DIR=${MY_WORK_DIR}/install_dir 
 
 
+function create_env()
+{
+cat << EOF > ${MY_CURR_DIR}/env.sh
+CC=/usr/bin/gcc
+CXX=/usr/bin/g++
+FC=/usr/bin/gfortran
+
+MY_CURR_DIR=$(pwd)
+MY_WORK_DIR="\${MY_CURR_DIR}/relion_benchmark_directory"
+BENCHMARK_PAYLOAD="ftp://ftp.mrc-lmb.cam.ac.uk/pub/scheres/relion_benchmark.tar.gz"
+MY_HIP_WORK_DIR="./hip_work" 
+OMPI_DOWNLOAD_LINK="https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.5.tar.gz"
+UCX_DOWNLOAD_LINK="https://github.com/openucx/ucx/releases/download/v1.17.0/ucx-1.17.0.tar.gz"
+MY_CORE_COUNT=24 # don't use too much lol
+INSTALL_DEST_DIR="\${MY_WORK_DIR}/install_dir"
+LIBRARY_PATH="\${INSTALL_DEST_DIR}/lib:\${INSTALL_DEST_DIR}/lib64:\${LIBRARY_PATH}"
+LD_LIBRARY_PATH="\${INSTALL_DEST_DIR}/lib:\${INSTALL_DEST_DIR}/lib64:\${LD_LIBRARY_PATH}"
+PATH="\${INSTALL_DEST_DIR}/bin:\${PATH}"
+CPATH="\${INSTALL_DEST_DIR}/include:\${CPATH}"
+export MY_CURR_DIR MY_WORK_DIR BENCHMARK_PAYLOAD MY_HIP_WORK_DIR OMPI_DOWNLOAD_LINK UCX_DOWNLOAD_LINK MY_CORE_COUNT INSTALL_DEST_DIR LIBRARY_PATH LD_LIBRARY_PATH PATH CPATH CC CXX FC
+export LD_LIBRARY_PATH=/opt/rocm/lib:$LD_LIBRARY_PATH
+export PATH=/opt/rocm/:$PATH
+export ROCM_PATH=/opt/rocm/
+
+EOF
+
+}
+
 function download_openmpi_and_ucx_then_install()
 {
     wget ${OMPI_DOWNLOAD_LINK}
@@ -46,8 +74,7 @@ function download_openmpi_and_ucx_then_install()
     pushd build
     ../configure --prefix=${INSTALL_DEST_DIR} --with-ucx=${INSTALL_DEST_DIR} \
     --with-rocm=/opt/rocm \
-    --enable-mca-no-build=btl-uct --enable-mpi1-compatibility \
-    CC=gcc CXX=g++ FC=gfortran
+    --enable-mca-no-build=btl-uct --enable-mpi1-compatibility 
 
     #clean it up
     make distclean
@@ -71,8 +98,9 @@ function grab_build_packages()
     sudo apt update
     sudo add-apt-repository -y ppa:apptainer/ppa
     sudo apt update
-    sudo apt-get install cmake fuse3 libfuse3-dev
-    sudo apt install -y apptainer-suid
+    sudo apt-get install -ymq cmake fuse3 libfuse3-dev clang-15 libfftw3-dev libtiff-dev libpng-dev ghostscript libxft-dev git build-essential gfortran-11 gfortran g++-11 gcc-11 gcc g++ libstdc++-11-dev libstdc++-12-dev
+    sudo apt-get install -ymq apptainer-suid
+
 }
 
 function set_ulimit()
@@ -132,6 +160,8 @@ function grab_relion_repo()
 function build_relion_for_amd()
 {
 
+sudo mkdir -p /opt/rocm/hip
+sudo ln -s /opt/rocm-6.1.2/lib/cmake/hip /opt/rocm/hip/cmake
 
 for C_ARCH in ${MY_CUDA_ARCH[@]};
 do
@@ -145,14 +175,17 @@ do
 
     make clean
 
-    cmake -DGUI=ON -DCUDA=ON -DALTCPU=FALSE -DCudaTexture=ON -DCUDA_ARCH=${C_ARCH} \
-    -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DMPI_C_COMPILER=mpicc -DMPI_CXX_COMPILER=mpicc \
-    -DDoublePrec_CPU=ON -DDoublePrec_GPU=OFF \
-    -DCMAKE_C_FLAGS="-O2 -g -lm -mavx2" \
-    -DCMAKE_CXX_FLAGS="-O2 -g -lm -lstdc++ -mavx2" \
-    -DPYTHON_EXE_PATH="/usr/bin/python3.9" \
-    -DCMAKE_INSTALL_PREFIX="/hpc/apps/relion-turbo/ver5.0-git-CU${C_ARCH}" \
-    ..
+
+    cmake -DCMAKE_BUILD_TYPE=Release -DHIP=ON -DHIP_ARCH="gfx90a,gfx908,gfx942" -DFORCE_OWN_FFTW=ON  -DAMDFFTW=on ..
+
+#    cmake -DGUI=ON -DCUDA=ON -DALTCPU=FALSE -DCudaTexture=ON -DCUDA_ARCH=${C_ARCH} \
+#    -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DMPI_C_COMPILER=mpicc -DMPI_CXX_COMPILER=mpicc \
+#    -DDoublePrec_CPU=ON -DDoublePrec_GPU=OFF \
+#    -DCMAKE_C_FLAGS="-O2 -g -lm -mavx2" \
+#    -DCMAKE_CXX_FLAGS="-O2 -g -lm -lstdc++ -mavx2" \
+#    -DPYTHON_EXE_PATH="/usr/bin/python3.9" \
+#    -DCMAKE_INSTALL_PREFIX="/hpc/apps/relion-turbo/ver5.0-git-CU${C_ARCH}" \
+#    ..
 
     make -j 8
 
@@ -261,6 +294,8 @@ main
 ##
 ##
 
+#-- CMAKE_C_FLAGS : -std=c99  -fopenmp
+#-- CMAKE_CXX_FLAGS : -fPIC -std=c++14  -fopenmp
 
 #!/bin/bash 
 #SBATCH --cpus-per-task=2
