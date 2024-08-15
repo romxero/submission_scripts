@@ -25,3 +25,6 @@ export LC_ALL=C.UTF-8
 
 %runscript
 java -jar /usr/local/kroki/kroki-server.jar
+
+
+# kill # java -jar /usr/local/kroki/kroki-server.jar list | grep kroki | cut -d '/' -f 1 | xargs -I'{}' 
