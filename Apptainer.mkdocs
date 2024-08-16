@@ -13,7 +13,7 @@ From: yuzutech/kroki
 %post
 
 apt-get -ymq update
-apt-get -ymq install python3-pip
+apt-get -ymq install python3-pip git 
 
 pip3 install mkdocs-material mkdocs-kroki-plugin mkdocs-gitbook lantana mkdocs-bootstrap4 mkdocs-cluster #--break-system-packages
 
@@ -21,10 +21,13 @@ pip3 install mkdocs-material mkdocs-kroki-plugin mkdocs-gitbook lantana mkdocs-b
 
 %environment
 export LC_ALL=C.UTF-8
-
+export MAIN_KROKI_PORT=51080
 
 %runscript
-java -jar /usr/local/kroki/kroki-server.jar
+java -DKROKI_LISTEN=127.0.0.1:${MAIN_KROKI_PORT} -jar /usr/local/kroki/kroki-server.jar &> /tmp/kroki_err_and_out.log &
+
 
 
 # kill # java -jar /usr/local/kroki/kroki-server.jar list | grep kroki | cut -d '/' -f 1 | xargs -I'{}' 
+# java -jar /usr/local/kroki/kroki-server.jar list | grep kroki | cut -d '/' -f 1 > /tmp/java_job
+
