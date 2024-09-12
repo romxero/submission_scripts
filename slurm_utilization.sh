@@ -24,3 +24,6 @@ sacct --clusters dojo --allusers \
 # Reset TZ
 unset TZ
 
+
+
+sacct -a -X -S 2024-08-24T00:00:00  -o start,submit,state | grep -v -e "None" -e "Unknown"  | less
