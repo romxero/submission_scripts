@@ -1,17 +1,24 @@
 #!/bin/bash
 
+#set -x #for debugging
 
 #This will scan the file systems for the given directories and print the size of each directory
 
-FS_TO_SCAN=("/data" "/exp")
-
 #declare the variables for processing 
+FS_TO_SCAN=("/data" "/exp")
+SLACK_WEBHOOK_URL="contextual.ai"
+SLEEP_TIME=$((3600 * 2)) # 4 hours
+ERROR_LOG_FILE=$PWD/df_to_slack_errors.err
 
-SLEEP_TIME=3600 # 1 hour
 
-
+# associative array
 declare -A SEVERITY_THRESHOLDS 
 
+# start 
+
+touch ${ERROR_LOG_FILE} # create the file in question and/or adjust the timestamp
+
+# populate the values to show severity 
 for i in $(seq 1 100); do
     
     #an associative array to hold the severity level for each threshold
@@ -36,23 +43,45 @@ for i in $(seq 1 100); do
 
 done
 
-#testing this associative arrauy 
+
+#infinite loop to process whats going on with the file system 
 
 while true; do
 
     for fs in ${FS_TO_SCAN[@]}; do
         PERCENT_USED=$(df ${fs} --output="pcent" | sed -e 1d | sed 's/%//g' | xargs)
-        echo $PERCENT_USED
+#       echo $PERCENT_USED
         SEVERITY_LEVEL=${SEVERITY_THRESHOLDS[$PERCENT_USED]}
-        echo $SEVERITY_LEVEL
+#       echo $SEVERITY_LEVEL
+
+        if [ $SEVERITY_LEVEL == "CRITICAL" ]; then
+            MSG_STRING=$(echo "CRITICAL: $fs is $PERCENT_USED% full")
+            temp_file=$(mktemp /tmp/tempfile.XXXXXX)
+            JSON_STRING="{\"text\": \" Disk Space Usage \\n \`\`\`$MSG_STRING\`\`\` \"}"
+            curl -s -f  --retry 2 -X POST -H 'Content-type: application/json' --data "$JSON_STRING" ${SLACK_WEBHOOK_URL} &> ${ERROR_LOG_FILE} 
+
+        fi
+
+        if [ $SEVERITY_LEVEL == "HIGH" ]; then
+            MSG_STRING=$(echo "HIGH: $fs is $PERCENT_USED% full")
+            JSON_STRING="{\"text\": \" Disk Space Usage \\n \`\`\`$MSG_STRING\`\`\` \"}"
+            curl -s -f  --retry 2 -X POST -H 'Content-type: application/json' --data "$JSON_STRING" ${SLACK_WEBHOOK_URL} &> ${ERROR_LOG_FILE}
+
+        fi
+
+        if [ $SEVERITY_LEVEL == "MEDIUM_HIGH" ]; then
+            MSG_STRING=$(echo "MEDIUM_HIGH: $fs is $PERCENT_USED% full")
+            JSON_STRING="{\"text\": \" Disk Space Usage \\n \`\`\`$MSG_STRING\`\`\` \"}"
+            curl -s -f  --retry 2 -X POST -H 'Content-type: application/json' --data "$JSON_STRING" ${SLACK_WEBHOOK_URL} &> ${ERROR_LOG_FILE} 
+
+        fi
+        
     done
-
-
-    #sleep for 1 hour
-    sleep 10
-
+    
+    #sleep for 2 hours
+    sleep ${SLEEP_TIME}
 
 done
 
-#echo ${SEVERITY_THRESHOLDS[100]}
+
 
