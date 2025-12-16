@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: rockylinux:9
+
+%labels
+        Author _RC_
+        Version v0.0.1
+
+%post
+export LC_ALL=C.UTF-8
+#install epel and ansible core
+dnf install -y epel-release 
+dnf config-manager --set-enabled crb
+
+dnf install --skip-broken -y wget curl tigervnc-server tigervnc Xorg icewm icewm-session icewmbg icewm-menu-fdo gtk3 gtk2 firefox firefox-x11
+#gcc g++ clang mold alsa-lib-devel fontconfig-devel wayland-devel libxkbcommon-x11-devel openssl-devel libzstd-devel perl-FindBin perl-IPC-Cmd perl-File-Compare perl-File-Copy vulkan-loader sqlite-devel
+
+#cd /opt
+#wget https://github.com/zed-industries/zed/releases/download/v0.146.5/zed-linux-x86_64.tar.gz
+#tar zxvf zed-linux-x86_64.tar.gz
+#rm -f zed-linux-x86_64.tar.gz
+
+
+%environment
+export LC_ALL=C.UTF-8
+export PATH=/opt/zed.app/libexec:$PATH 
+export PATH=/opt/zed.app/bin:$PATH
+export LD_LIBRARY_PATH=/opt/zed.app/lib:$LD_LIBRARY_PATH
+
+%runscript
+#bash -l /opt/zed.app/bin/zed 
+
+
+
